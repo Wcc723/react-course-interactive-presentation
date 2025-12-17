@@ -1,12 +1,13 @@
-import { SlideTemplate } from './template';
-import { exampleSteps } from './data/exampleSlide';
+import { Routes, Route } from 'react-router-dom';
+import { Home } from './pages/Home';
+import { SeparationOfConcernsSlide } from './week1/關注點分離';
 
 function App() {
   return (
-    <SlideTemplate
-      title="React 互動式教學簡報"
-      steps={exampleSteps}
-    />
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/week1/separation-of-concerns" element={<SeparationOfConcernsSlide />} />
+    </Routes>
   );
 }
 
