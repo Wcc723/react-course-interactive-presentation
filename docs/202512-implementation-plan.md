@@ -5,13 +5,11 @@
 
 ## 技術環境
 - React 19 + Vite 7 + Tailwind CSS v4 + TypeScript
-- 程式碼高亮：prism-react-renderer
-- 動畫效果：framer-motion
 
 ## 設計決策
 - **配色方案**：淺色主題
 - **動畫效果**：步驟切換淡入淡出
-- 簡單，大氣，可參考 Material Design 設計風格
+- 範例版型參考 ./docs/sample.html
 
 ---
 
