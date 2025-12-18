@@ -68,22 +68,39 @@ export function SlideTemplate({ title, steps }: SlideTemplateProps) {
             transition={{ duration: 0.25 }}
             className="flex-1 flex flex-col lg:flex-row"
           >
-            {/* 左側：預覽區 */}
-            <div className="lg:w-1/2 border-b lg:border-b-0 lg:border-r border-amber-200/60">
-              <PreviewArea preview={currentStep.preview} />
-            </div>
-
-            {/* 右側：程式碼區 */}
-            <div className="lg:w-1/2 flex flex-col bg-white/60">
-              {currentStep.description && (
-                <div className="px-5 py-3 border-b border-amber-200/60 bg-gradient-to-r from-amber-100/50 to-orange-100/30">
-                  <p className="text-sm text-stone-700 leading-relaxed">{currentStep.description}</p>
+            {/* 判斷是否有程式碼區塊 */}
+            {currentStep.codeBlocks && currentStep.codeBlocks.length > 0 ? (
+              <>
+                {/* 左側：預覽區 */}
+                <div className="lg:w-1/2 border-b lg:border-b-0 lg:border-r border-amber-200/60">
+                  <PreviewArea preview={currentStep.preview} />
                 </div>
-              )}
-              <div className="flex-1 p-5 overflow-auto">
-                <CodeTabs codeBlocks={currentStep.codeBlocks} />
+
+                {/* 右側：程式碼區 */}
+                <div className="lg:w-1/2 flex flex-col bg-white/60">
+                  {currentStep.description && (
+                    <div className="px-5 py-3 border-b border-amber-200/60 bg-gradient-to-r from-amber-100/50 to-orange-100/30">
+                      <p className="text-sm text-stone-700 leading-relaxed">{currentStep.description}</p>
+                    </div>
+                  )}
+                  <div className="flex-1 p-5 overflow-auto">
+                    <CodeTabs codeBlocks={currentStep.codeBlocks} />
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* 滿版預覽模式 */
+              <div className="w-full flex flex-col">
+                {currentStep.description && (
+                  <div className="px-5 py-3 border-b border-amber-200/60 bg-gradient-to-r from-amber-100/50 to-orange-100/30">
+                    <p className="text-sm text-stone-700 leading-relaxed">{currentStep.description}</p>
+                  </div>
+                )}
+                <div className="flex-1">
+                  <PreviewArea preview={currentStep.preview} fullWidth />
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </AnimatePresence>
 

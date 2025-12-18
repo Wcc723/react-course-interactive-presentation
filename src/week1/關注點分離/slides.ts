@@ -5,10 +5,12 @@ import {
   SeparationOfConcernsDiagram,
   DataSyncBenefitDiagram,
 } from './diagrams';
+import { TraditionalDemo, SeparationDemo } from './demos';
 
 export const slideTitle = '關注點分離 Separation of Concerns';
 
 export const steps: Step[] = [
+  // 第 1 頁：傳統 DOM 操作說明
   {
     id: 'traditional-dom',
     title: '傳統 JavaScript 直接操作 DOM',
@@ -46,6 +48,8 @@ btn.addEventListener('click', () => {
       },
     ],
   },
+
+  // 第 2 頁：多處存取的困境
   {
     id: 'multi-access-problem',
     title: '多處存取的困境',
@@ -81,6 +85,21 @@ function updateUserNameB() {
       },
     ],
   },
+
+  // 第 3 頁：傳統方式互動示範（新增）
+  {
+    id: 'traditional-demo',
+    title: '實際體驗：傳統方式的繁瑣',
+    description:
+      '試試看：你需要點擊多少個按鈕，才能讓所有 UI 區域都顯示新的使用者名稱？',
+    preview: {
+      type: 'component',
+      component: TraditionalDemo,
+    },
+    // 無 codeBlocks，使用滿版預覽
+  },
+
+  // 第 4 頁：關注點分離概念
   {
     id: 'separation-of-concerns',
     title: '關注點分離：資料與畫面分離',
@@ -122,6 +141,8 @@ function updateUserName(newName) {
       },
     ],
   },
+
+  // 第 5 頁：資料聯動優點
   {
     id: 'data-sync-benefit',
     title: '優點：資料更新，畫面同步聯動',
@@ -180,5 +201,18 @@ function Footer({ count }) {
         highlightLines: [2, 3, 6, 7, 10, 11, 14, 15],
       },
     ],
+  },
+
+  // 第 6 頁：關注點分離互動示範（新增）
+  {
+    id: 'separation-demo',
+    title: '實際體驗：關注點分離的便利',
+    description:
+      '試試看：只需要在輸入框中修改資料，所有 UI 區域就會自動同步更新！',
+    preview: {
+      type: 'component',
+      component: SeparationDemo,
+    },
+    // 無 codeBlocks，使用滿版預覽
   },
 ];

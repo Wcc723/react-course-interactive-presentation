@@ -3,9 +3,10 @@ import type { Preview } from '../types/slide';
 
 interface PreviewAreaProps {
   preview: Preview;
+  fullWidth?: boolean;
 }
 
-export function PreviewArea({ preview }: PreviewAreaProps) {
+export function PreviewArea({ preview, fullWidth = false }: PreviewAreaProps) {
   const iframeContent = useMemo(() => {
     if (preview.type !== 'code-result') return '';
 
@@ -35,21 +36,24 @@ export function PreviewArea({ preview }: PreviewAreaProps) {
 </html>`;
   }, [preview]);
 
+  const padding = fullWidth ? 'p-8' : 'p-5';
+  const imageMaxHeight = fullWidth ? 'max-h-[500px]' : 'max-h-[280px]';
+
   switch (preview.type) {
     case 'image':
       return (
-        <div className="flex items-center justify-center h-full p-6 bg-amber-50/50">
+        <div className={`flex items-center justify-center h-full ${padding} bg-amber-50/50`}>
           <img
             src={preview.src}
             alt={preview.alt || '預覽圖片'}
-            className="max-w-full max-h-[280px] object-contain rounded-lg shadow-sm"
+            className={`max-w-full ${imageMaxHeight} object-contain rounded-lg shadow-sm`}
           />
         </div>
       );
 
     case 'code-result':
       return (
-        <div className="h-full p-5 bg-amber-50/50">
+        <div className={`h-full ${padding} bg-amber-50/50`}>
           <div className="h-full rounded-xl overflow-hidden border border-amber-200/60 shadow-inner bg-white/80">
             <iframe
               srcDoc={iframeContent}
@@ -64,7 +68,7 @@ export function PreviewArea({ preview }: PreviewAreaProps) {
     case 'component': {
       const Component = preview.component;
       return (
-        <div className="h-full p-5 bg-amber-50/50 overflow-auto">
+        <div className={`h-full ${padding} bg-amber-50/50 overflow-auto`}>
           <div className="h-full rounded-xl border border-amber-200/60 shadow-inner bg-white/80 p-6 flex items-center justify-center">
             <Component />
           </div>

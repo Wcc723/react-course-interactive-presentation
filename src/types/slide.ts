@@ -20,7 +20,7 @@ export interface Step {
   title: string;
   description?: string;
   preview: Preview;
-  codeBlocks: CodeBlock[];
+  codeBlocks?: CodeBlock[];  // 可選，若無則顯示滿版預覽
 }
 
 // 簡報 Props
