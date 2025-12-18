@@ -21,6 +21,13 @@ export const courses: Course[] = [
     path: '/week2/async-javascript',
     description: '理解 JavaScript 非同步機制與 Async/Await 語法',
   },
+  {
+    id: 'ecommerce-api',
+    week: 2,
+    title: '電商 API',
+    path: '/week2/ecommerce-api',
+    description: '了解前後端溝通與 API 串接的核心概念',
+  },
 ];
 
 export function getCoursesByWeek(week: number): Course[] {
