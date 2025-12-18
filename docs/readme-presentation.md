@@ -1,6 +1,8 @@
-# 互動式簡報使用指南
+# 互動式簡報開發指南
 
-這是一個 React 教學用的互動式簡報版型，支援步驟切換、程式碼展示與即時預覽功能。
+這是一個 React 教學用的互動式簡報版型，支援步驟切換、程式碼展示、即時預覽與互動操作功能。
+
+---
 
 ## 專案結構
 
@@ -26,95 +28,8 @@ src/
     └── 關注點分離/
         ├── index.tsx        # 入口組件
         ├── slides.ts        # 簡報資料
-        └── diagrams.tsx     # SVG 圖示
-```
-
-## 路由結構
-
-| 路徑 | 頁面 |
-|------|------|
-| `/` | 課程首頁（列出所有課程） |
-| `/week1/separation-of-concerns` | Week 1 - 關注點分離 |
-
-## 新增課程
-
-### 步驟 1：建立課程目錄
-
-```
-src/week1/新課程名稱/
-├── index.tsx      # 入口組件
-├── slides.ts      # 簡報資料
-└── diagrams.tsx   # SVG 圖示（選用）
-```
-
-### 步驟 2：建立簡報資料 (`slides.ts`)
-
-```typescript
-import type { Step } from '../../types/slide';
-
-export const slideTitle = '課程標題';
-
-export const steps: Step[] = [
-  {
-    id: 'step-1',
-    title: '步驟標題',
-    description: '步驟說明文字',
-    preview: {
-      type: 'code-result',
-      html: '<div>預覽內容</div>',
-      css: '/* CSS 樣式 */',
-    },
-    codeBlocks: [
-      {
-        language: 'tsx',
-        filename: 'Example.tsx',
-        code: `// 程式碼內容`,
-        highlightLines: [1, 2, 3],
-      },
-    ],
-  },
-];
-```
-
-### 步驟 3：建立入口組件 (`index.tsx`)
-
-```tsx
-import { SlideTemplate } from '../../template';
-import { slideTitle, steps } from './slides';
-
-export function NewCourseSlide() {
-  return <SlideTemplate title={slideTitle} steps={steps} />;
-}
-
-export { slideTitle, steps } from './slides';
-```
-
-### 步驟 4：註冊課程
-
-在 `src/data/courses.ts` 加入課程資料：
-
-```typescript
-export const courses: Course[] = [
-  // 現有課程...
-  {
-    id: 'new-course',
-    week: 1,
-    title: '新課程',
-    path: '/week1/new-course',
-    description: '課程描述',
-  },
-];
-```
-
-### 步驟 5：設定路由
-
-在 `src/App.tsx` 加入路由：
-
-```tsx
-import { NewCourseSlide } from './week1/新課程名稱';
-
-// 在 Routes 內加入
-<Route path="/week1/new-course" element={<NewCourseSlide />} />
+        ├── diagrams.tsx     # SVG 圖示組件
+        └── demos.tsx        # 互動示範組件
 ```
 
 ---
@@ -123,21 +38,17 @@ import { NewCourseSlide } from './week1/新課程名稱';
 
 ### Step（步驟）
 
-每個步驟包含預覽區和程式碼區的內容：
-
 ```typescript
 interface Step {
-  id: string;           // 唯一識別碼
-  title: string;        // 步驟標題（顯示在 Header）
-  description?: string; // 步驟說明（顯示在程式碼區上方）
-  preview: Preview;     // 預覽內容
-  codeBlocks: CodeBlock[]; // 程式碼區塊（支援多個 Tab）
+  id: string;            // 唯一識別碼
+  title: string;         // 步驟標題（顯示在 Header）
+  description?: string;  // 步驟說明文字
+  preview: Preview;      // 預覽內容
+  codeBlocks?: CodeBlock[]; // 程式碼區塊（可選，省略時為滿版預覽）
 }
 ```
 
 ### Preview（預覽類型）
-
-支援三種預覽模式：
 
 ```typescript
 type Preview =
@@ -146,24 +57,255 @@ type Preview =
   | { type: 'component'; component: React.ComponentType };
 ```
 
-#### 1. 圖片預覽
+### CodeBlock（程式碼區塊）
+
+```typescript
+interface CodeBlock {
+  language: 'html' | 'css' | 'javascript' | 'typescript' | 'jsx' | 'tsx';
+  code: string;
+  filename?: string;         // 顯示檔案名稱
+  highlightLines?: number[]; // 高亮指定行號
+}
+```
+
+---
+
+## 兩種版型模式
+
+### 1. 左右分割模式（預設）
+
+當 `codeBlocks` 有內容時，左側顯示預覽，右側顯示程式碼。
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  [課程▾] │ 簡報標題                        步驟 1/6      │
+├────────────────────────────┬─────────────────────────────┤
+│                            │  步驟說明文字               │
+│      預覽區域              ├─────────────────────────────┤
+│   (圖示/HTML/組件)         │  [Tab1] [Tab2]              │
+│                            │   程式碼區域                │
+│                            │   (語法高亮)                │
+├────────────────────────────┴─────────────────────────────┤
+│  [← 上一步]        ● ● ● ● ● ●        [下一步 →]        │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 2. 滿版預覽模式
+
+當 `codeBlocks` 省略或為空陣列時，預覽區域佔滿整個寬度，適合互動示範。
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  [課程▾] │ 簡報標題                        步驟 3/6      │
+├──────────────────────────────────────────────────────────┤
+│  步驟說明文字                                            │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│                    滿版預覽區域                          │
+│                 (互動組件/大型圖示)                      │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│  [← 上一步]        ● ● ● ● ● ●        [下一步 →]        │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 新增課程完整流程
+
+### 步驟 1：建立課程目錄結構
+
+```
+src/weekN/課程名稱/
+├── index.tsx      # 入口組件
+├── slides.ts      # 簡報資料
+├── diagrams.tsx   # SVG 圖示組件（選用）
+└── demos.tsx      # 互動示範組件（選用）
+```
+
+### 步驟 2：建立 SVG 圖示組件 (`diagrams.tsx`)
+
+用於說明概念的靜態圖示：
+
+```tsx
+// 使用米黃色背景配色
+export function ConceptDiagram() {
+  return (
+    <svg width="400" height="300" viewBox="0 0 400 300">
+      {/* 背景 */}
+      <rect width="400" height="300" fill="#fffdf8" />
+
+      {/* 方塊元素 */}
+      <rect x="50" y="50" width="120" height="60" rx="8" fill="#3b82f6" />
+      <text x="110" y="85" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+        標題文字
+      </text>
+
+      {/* 箭頭 */}
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
+        </marker>
+      </defs>
+      <path d="M170,80 L230,80" stroke="#10b981" strokeWidth="2" markerEnd="url(#arrow)" />
+    </svg>
+  );
+}
+```
+
+**常用配色：**
+- 背景：`#fffdf8`（米黃）
+- 藍色方塊：`#3b82f6`
+- 綠色方塊：`#10b981`
+- 橘色方塊：`#f59e0b`
+- 紅色警告：`#ef4444`
+- 文字灰：`#78716c`
+
+### 步驟 3：建立互動示範組件 (`demos.tsx`)
+
+用於讓學員實際操作體驗的互動組件：
+
+```tsx
+import { useState } from 'react';
+
+export function InteractiveDemo() {
+  const [value, setValue] = useState('初始值');
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      {/* 說明區 */}
+      <div className="mb-6 p-4 bg-amber-100/50 rounded-xl border border-amber-200">
+        <p className="text-sm text-stone-700">
+          <strong>操作說明：</strong>這裡說明如何互動...
+        </p>
+      </div>
+
+      {/* 互動區域 */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* UI 展示卡片 */}
+        <div className="p-4 rounded-xl border-2 border-stone-200 bg-white">
+          <div className="text-xs text-stone-400 mb-1">區域名稱</div>
+          <div className="text-lg font-semibold text-stone-800">{value}</div>
+        </div>
+      </div>
+
+      {/* 操作按鈕 */}
+      <div className="mt-6 p-4 bg-stone-100 rounded-xl">
+        <button
+          onClick={() => setValue('新值')}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          更新
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### 步驟 4：建立簡報資料 (`slides.ts`)
+
+```typescript
+import type { Step } from '../../types/slide';
+import { ConceptDiagram } from './diagrams';
+import { InteractiveDemo } from './demos';
+
+export const slideTitle = '課程標題';
+
+export const steps: Step[] = [
+  // 一般模式：左右分割（圖示 + 程式碼）
+  {
+    id: 'concept',
+    title: '概念說明',
+    description: '這是概念的說明文字...',
+    preview: {
+      type: 'component',
+      component: ConceptDiagram,
+    },
+    codeBlocks: [
+      {
+        language: 'javascript',
+        filename: 'example.js',
+        code: `// 範例程式碼
+const example = 'hello';`,
+        highlightLines: [2],
+      },
+    ],
+  },
+
+  // 滿版模式：互動示範（無程式碼）
+  {
+    id: 'interactive',
+    title: '實際體驗',
+    description: '試試看：操作下方的互動元件...',
+    preview: {
+      type: 'component',
+      component: InteractiveDemo,
+    },
+    // 省略 codeBlocks 即為滿版預覽
+  },
+];
+```
+
+### 步驟 5：建立入口組件 (`index.tsx`)
+
+```tsx
+import { SlideTemplate } from '../../template';
+import { slideTitle, steps } from './slides';
+
+export function CourseSlide() {
+  return <SlideTemplate title={slideTitle} steps={steps} />;
+}
+
+export { slideTitle, steps } from './slides';
+```
+
+### 步驟 6：註冊課程
+
+在 `src/data/courses.ts` 加入：
+
+```typescript
+{
+  id: 'course-id',
+  week: 1,
+  title: '課程標題',
+  path: '/week1/course-id',
+  description: '課程簡短描述',
+},
+```
+
+### 步驟 7：設定路由
+
+在 `src/App.tsx` 加入：
+
+```tsx
+import { CourseSlide } from './week1/課程名稱';
+
+<Route path="/week1/course-id" element={<CourseSlide />} />
+```
+
+---
+
+## Preview 類型詳解
+
+### 1. 圖片預覽
 
 ```typescript
 preview: {
   type: 'image',
-  src: '/path/to/image.png',
+  src: '/images/diagram.png',
   alt: '圖片說明'
 }
 ```
 
-#### 2. HTML/CSS 即時渲染
+### 2. HTML/CSS 即時渲染
 
-在 iframe sandbox 中渲染 HTML 和 CSS：
+在 iframe sandbox 中渲染，適合展示純 HTML/CSS 效果：
 
 ```typescript
 preview: {
   type: 'code-result',
-  html: '<button class="btn">點擊我</button>',
+  html: `<button class="btn">按鈕</button>`,
   css: `.btn {
     padding: 12px 24px;
     background: #3b82f6;
@@ -174,40 +316,16 @@ preview: {
 }
 ```
 
-#### 3. React 組件預覽（含 SVG 圖示）
+### 3. React 組件預覽
 
-直接渲染 React 組件，適合用於 SVG 圖示：
+直接渲染 React 組件，適合 SVG 圖示和互動元件：
 
 ```typescript
-// diagrams.tsx
-export function MyDiagram() {
-  return (
-    <svg width="400" height="300" viewBox="0 0 400 300">
-      <rect x="20" y="20" width="100" height="60" rx="8" fill="#3b82f6" />
-      <text x="70" y="55" textAnchor="middle" fill="white" fontSize="14">
-        方塊
-      </text>
-    </svg>
-  );
-}
-
-// slides.ts
-import { MyDiagram } from './diagrams';
+import { MyComponent } from './diagrams';
 
 preview: {
   type: 'component',
-  component: MyDiagram
-}
-```
-
-### CodeBlock（程式碼區塊）
-
-```typescript
-interface CodeBlock {
-  language: 'html' | 'css' | 'javascript' | 'typescript' | 'jsx' | 'tsx';
-  code: string;
-  filename?: string;        // 顯示檔案名稱
-  highlightLines?: number[]; // 高亮指定行號
+  component: MyComponent
 }
 ```
 
@@ -215,78 +333,40 @@ interface CodeBlock {
 
 ## 功能說明
 
-### 課程選單
-
-左上角的「課程」按鈕可展開下拉選單：
-- 快速切換不同課程
-- 返回課程首頁
-
 ### 導航方式
+- **按鈕**：「上一步」「下一步」
+- **鍵盤**：`←` 上一步、`→` 下一步
 
-- **按鈕點擊**：點擊「上一步」「下一步」按鈕切換
-- **鍵盤快捷鍵**：
-  - `←` 左箭頭：上一步
-  - `→` 右箭頭：下一步
+### 課程選單
+左上角「課程」按鈕可快速切換課程或返回首頁
 
-### 程式碼 Tab 切換
-
-當一個步驟有多個 `codeBlocks` 時，會自動顯示 Tab 切換介面，點擊 Tab 可切換不同程式碼檔案。
+### 程式碼 Tab
+多個 `codeBlocks` 時自動顯示 Tab 切換
 
 ### 行號高亮
-
-使用 `highlightLines` 陣列指定要高亮的行號，適合用於強調重點程式碼：
-
 ```typescript
-codeBlocks: [
-  {
-    language: 'tsx',
-    code: `// 第 1 行
-// 第 2 行 - 會高亮
-// 第 3 行 - 會高亮
-// 第 4 行`,
-    highlightLines: [2, 3], // 高亮第 2、3 行
-  },
-]
+highlightLines: [2, 3, 5]  // 高亮第 2、3、5 行
 ```
 
 ---
 
-## 版型結構
+## 範例參考
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  [課程▾] │ 簡報標題                        步驟 1/5      │
-│          │ 步驟標題                                      │
-├────────────────────────────┬─────────────────────────────┤
-│                            │  步驟說明文字               │
-│                            ├─────────────────────────────┤
-│      預覽區域              │  [Tab1] [Tab2] [Tab3]       │
-│   (圖片/HTML渲染/SVG組件)  │                             │
-│                            │   程式碼區域                │
-│                            │   (語法高亮 + 行號)         │
-│                            │                             │
-├────────────────────────────┴─────────────────────────────┤
-│  [← 上一步]        ● ● ●─● ●        [下一步 →]          │
-└──────────────────────────────────────────────────────────┘
-```
+參考 `src/week1/關注點分離/` 目錄：
 
----
+| 檔案 | 說明 |
+|------|------|
+| `slides.ts` | 6 個步驟的簡報資料 |
+| `diagrams.tsx` | 4 個 SVG 概念圖示 |
+| `demos.tsx` | 2 個互動示範組件 |
+| `index.tsx` | 入口組件 |
 
-## 支援的程式語言
+**簡報結構：**
+1. 概念說明（圖示 + 程式碼）
+2. 問題說明（圖示 + 程式碼）
+3. **互動體驗（滿版）**
+4. 解決方案（圖示 + 程式碼）
+5. 優點說明（圖示 + 程式碼）
+6. **互動體驗（滿版）**
 
-- `html`
-- `css`
-- `javascript`
-- `typescript`
-- `jsx`
-- `tsx`
-
----
-
-## 完整範例
-
-參考 `src/week1/關注點分離/` 目錄，包含：
-
-- `slides.ts` - 4 個步驟的簡報資料
-- `diagrams.tsx` - 4 個 SVG 圖示組件
-- `index.tsx` - 入口組件
+這種「說明 → 體驗」的交替模式，有助於學員理解概念後立即實作驗證。
