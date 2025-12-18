@@ -14,7 +14,13 @@ export const courses: Course[] = [
     path: '/week1/separation-of-concerns',
     description: '了解資料與畫面分離的核心概念',
   },
-  // 未來可以在這裡加入更多課程
+  {
+    id: 'async-javascript',
+    week: 2,
+    title: '非同步 JavaScript',
+    path: '/week2/async-javascript',
+    description: '理解 JavaScript 非同步機制與 Async/Await 語法',
+  },
 ];
 
 export function getCoursesByWeek(week: number): Course[] {
