@@ -7,7 +7,7 @@ import {
   PromiseDiagram,
   AsyncPromiseDiagram,
 } from './diagrams';
-import { BlockingDemo, AsyncAwaitDemo } from './demos';
+import { BlockingDemo, AsyncAwaitDemo, TryCatchDemo } from './demos';
 
 export const slideTitle = '非同步 JavaScript';
 
@@ -250,6 +250,19 @@ getUserData();`,
     preview: {
       type: 'component',
       component: AsyncAwaitDemo,
+    },
+    // 滿版預覽模式
+  },
+
+  // 9. Try...Catch 錯誤處理
+  {
+    id: 'try-catch-demo',
+    title: '實際體驗：Try...Catch 錯誤處理',
+    description:
+      '當 API 請求失敗時會發生什麼？點擊按鈕體驗 try...catch 如何捕捉錯誤，讓程式不會因為錯誤而中斷。API 有 50% 機率失敗！',
+    preview: {
+      type: 'component',
+      component: TryCatchDemo,
     },
     // 滿版預覽模式
   },

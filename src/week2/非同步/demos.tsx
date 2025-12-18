@@ -238,6 +238,237 @@ export function SetTimeoutDemo() {
   );
 }
 
+// 互動示範：Try...Catch 錯誤處理
+export function TryCatchDemo() {
+  const [step, setStep] = useState(0);
+  const [logs, setLogs] = useState<{ text: string; type: 'info' | 'success' | 'waiting' | 'data' | 'error' }[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; data?: string; error?: string } | null>(null);
+
+  // 隨機成功或失敗的 API
+  const simulateFetchWithError = () => {
+    return new Promise<string>((resolve, reject) => {
+      setTimeout(() => {
+        // 50% 機率失敗
+        if (Math.random() > 0.5) {
+          resolve('{ "name": "小明", "age": 25 }');
+        } else {
+          reject(new Error('伺服器錯誤：無法取得資料'));
+        }
+      }, 2000);
+    });
+  };
+
+  const runTryCatchDemo = async () => {
+    setLogs([]);
+    setResult(null);
+    setStep(0);
+    setIsRunning(true);
+
+    // Step 1: 開始執行 async 函式
+    setStep(1);
+    setLogs((prev) => [...prev, { text: '1. 呼叫 async 函式，進入 try 區塊', type: 'info' }]);
+    await sleep(800);
+
+    // Step 2: await 等待
+    setStep(2);
+    setLogs((prev) => [...prev, { text: '2. await 等待 Promise...', type: 'waiting' }]);
+    setLogs((prev) => [...prev, { text: '   ⏳ 等待伺服器回應中 (50% 機率失敗)...', type: 'waiting' }]);
+
+    try {
+      // 執行可能失敗的 Promise
+      const data = await simulateFetchWithError();
+
+      // Step 3: 成功
+      setStep(3);
+      setLogs((prev) => [...prev, { text: '3. ✓ Promise 成功 (resolve)！', type: 'success' }]);
+      setResult({ success: true, data });
+      await sleep(500);
+
+      // Step 4: 繼續執行 try 區塊後續程式碼
+      setStep(4);
+      setLogs((prev) => [...prev, { text: '4. 繼續執行 try 區塊內的程式碼', type: 'info' }]);
+      setLogs((prev) => [...prev, { text: `   資料內容: ${data}`, type: 'data' }]);
+    } catch (error) {
+      // Step 3: 失敗 - 跳到 catch
+      setStep(3);
+      setLogs((prev) => [...prev, { text: '3. ✗ Promise 失敗 (reject)！', type: 'error' }]);
+      await sleep(500);
+
+      // Step 4: 進入 catch 區塊
+      setStep(4);
+      const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+      setLogs((prev) => [...prev, { text: '4. 🛑 跳入 catch 區塊處理錯誤', type: 'error' }]);
+      setLogs((prev) => [...prev, { text: `   錯誤訊息: ${errorMessage}`, type: 'error' }]);
+      setResult({ success: false, error: errorMessage });
+    }
+
+    // Step 5: 程式繼續執行
+    setStep(5);
+    await sleep(500);
+    setLogs((prev) => [...prev, { text: '5. 程式繼續執行（不會中斷）', type: 'info' }]);
+
+    setIsRunning(false);
+  };
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const reset = () => {
+    setLogs([]);
+    setResult(null);
+    setStep(0);
+    setIsRunning(false);
+  };
+
+  return (
+    <div className="w-full max-w-5xl mx-auto">
+      {/* 說明區 */}
+      <div className="mb-6 p-4 bg-amber-100/50 rounded-xl border border-amber-200">
+        <p className="text-sm text-stone-700">
+          <strong>操作說明：</strong>點擊「執行 API 請求」按鈕，API 有 <strong>50% 機率失敗</strong>。
+          觀察 try...catch 如何捕捉錯誤，讓程式不會因為錯誤而中斷。
+        </p>
+      </div>
+
+      <div className="grid grid-cols-5 gap-4 mb-6">
+        {/* 流程步驟指示 */}
+        {[
+          { num: 1, label: 'try 區塊', color: 'bg-purple-500' },
+          { num: 2, label: 'await', color: 'bg-amber-500' },
+          { num: 3, label: result?.success === false ? 'reject' : 'resolve', color: result?.success === false ? 'bg-red-500' : 'bg-green-500' },
+          { num: 4, label: result?.success === false ? 'catch' : '繼續執行', color: result?.success === false ? 'bg-red-500' : 'bg-teal-500' },
+          { num: 5, label: '程式繼續', color: 'bg-blue-500' },
+        ].map((item) => (
+          <div
+            key={item.num}
+            className={`p-3 rounded-xl text-center transition-all duration-300 ${
+              step >= item.num ? `${item.color} text-white scale-105` : 'bg-stone-100 text-stone-400'
+            }`}
+          >
+            <div className="text-lg font-bold">{item.num}</div>
+            <div className="text-xs">{item.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* 程式碼展示 */}
+        <div className="p-4 rounded-xl bg-slate-900 text-white">
+          <div className="text-xs text-slate-400 mb-3">程式碼</div>
+          <pre className="text-xs font-mono leading-relaxed overflow-x-auto">
+            <code>
+              <span className={`${step >= 1 ? 'text-purple-400' : 'text-purple-400/50'}`}>async function</span>
+              <span className={`${step >= 1 ? 'text-yellow-300' : 'text-yellow-300/50'}`}> fetchData</span>
+              <span className="text-white">() {'{'}</span>
+              {'\n'}
+              <span className="text-white">{'  '}</span>
+              <span className={`${step >= 1 ? 'text-purple-400 font-bold' : 'text-purple-400/50'}`}>try</span>
+              <span className="text-white"> {'{'}</span>
+              {'\n'}
+              <span className="text-white">{'    '}</span>
+              <span className={`${step >= 2 ? 'text-purple-400' : 'text-purple-400/50'}`}>const</span>
+              <span className="text-white"> data = </span>
+              <span className={`${step >= 2 ? 'text-yellow-300 font-bold' : 'text-yellow-300/50'}`}>await</span>
+              <span className="text-white"> fetchAPI()</span>
+              {'\n'}
+              <span className="text-white">{'    '}</span>
+              <span className={`${step >= 4 && result?.success ? 'text-blue-400' : 'text-blue-400/50'}`}>console</span>
+              <span className={`${step >= 4 && result?.success ? 'text-white' : 'text-white/50'}`}>.log(data)</span>
+              <span className={`${step >= 4 && result?.success ? 'text-green-400' : 'text-green-400/50'}`}> // 成功</span>
+              {'\n'}
+              <span className="text-white">{'  }'}</span>
+              <span className={`${step >= 4 && result?.success === false ? 'text-red-400 font-bold' : 'text-red-400/50'}`}> catch</span>
+              <span className="text-white"> (error) {'{'}</span>
+              {'\n'}
+              <span className="text-white">{'    '}</span>
+              <span className={`${step >= 4 && result?.success === false ? 'text-blue-400' : 'text-blue-400/50'}`}>console</span>
+              <span className={`${step >= 4 && result?.success === false ? 'text-white' : 'text-white/50'}`}>.error(error)</span>
+              <span className={`${step >= 4 && result?.success === false ? 'text-red-400' : 'text-red-400/50'}`}> // 錯誤</span>
+              {'\n'}
+              <span className="text-white">{'  }'}</span>
+              {'\n'}
+              <span className="text-white">{'  '}</span>
+              <span className={`${step >= 5 ? 'text-blue-400' : 'text-blue-400/50'}`}>console</span>
+              <span className={`${step >= 5 ? 'text-white' : 'text-white/50'}`}>.log(</span>
+              <span className={`${step >= 5 ? 'text-green-300' : 'text-green-300/50'}`}>"程式繼續"</span>
+              <span className={`${step >= 5 ? 'text-white' : 'text-white/50'}`}>)</span>
+              {'\n'}
+              <span className="text-white">{'}'}</span>
+            </code>
+          </pre>
+        </div>
+
+        {/* 執行紀錄 */}
+        <div className="p-4 rounded-xl border-2 border-stone-200 bg-white">
+          <div className="text-xs text-stone-400 mb-3">執行紀錄</div>
+          <div className="min-h-[180px] font-mono text-sm space-y-2">
+            {logs.length === 0 ? (
+              <span className="text-stone-300">點擊按鈕開始執行...</span>
+            ) : (
+              logs.map((log, i) => (
+                <div
+                  key={i}
+                  className={`${
+                    log.type === 'success'
+                      ? 'text-green-600'
+                      : log.type === 'waiting'
+                        ? 'text-amber-600'
+                        : log.type === 'data'
+                          ? 'text-blue-600'
+                          : log.type === 'error'
+                            ? 'text-red-600'
+                            : 'text-stone-700'
+                  }`}
+                >
+                  {log.text}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* 結果顯示 */}
+          {result && (
+            <div className={`mt-4 p-3 rounded-lg border ${result.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className={`text-xs mb-1 ${result.success ? 'text-green-600' : 'text-red-600'}`}>
+                {result.success ? '✓ 成功取得資料：' : '✗ 捕捉到錯誤：'}
+              </div>
+              <div className={`font-mono ${result.success ? 'text-green-800' : 'text-red-800'}`}>
+                {result.success ? result.data : result.error}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 操作按鈕 */}
+      <div className="mt-6 flex gap-4 justify-center">
+        <button
+          onClick={runTryCatchDemo}
+          disabled={isRunning}
+          className="px-8 py-3 bg-gradient-to-r from-purple-500 to-red-500 text-white rounded-lg hover:from-purple-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-lg font-semibold"
+        >
+          {isRunning ? '執行中...' : '🎲 執行 API 請求 (隨機成功/失敗)'}
+        </button>
+        <button
+          onClick={reset}
+          className="px-6 py-3 bg-stone-200 text-stone-700 rounded-lg hover:bg-stone-300 transition-colors"
+        >
+          重置
+        </button>
+      </div>
+
+      {/* 重點提示 */}
+      <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+        <p className="text-sm text-blue-700">
+          <strong>💡 重點：</strong>
+          try...catch 可以捕捉 await 的錯誤（Promise reject），讓程式不會因為錯誤而崩潰。
+          即使發生錯誤，catch 區塊執行完後，程式仍會繼續執行！
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // 互動示範：完整 Async/Await + Promise 流程
 export function AsyncAwaitDemo() {
   const [step, setStep] = useState(0);
