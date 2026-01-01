@@ -28,6 +28,13 @@ export const courses: Course[] = [
     path: '/week2/ecommerce-api',
     description: '了解前後端溝通與 API 串接的核心概念',
   },
+  {
+    id: 'react-components',
+    week: 4,
+    title: 'React 元件',
+    path: '/week4/react-components',
+    description: '認識 React 元件化開發與 Props 資料傳遞',
+  },
 ];
 
 export function getCoursesByWeek(week: number): Course[] {
