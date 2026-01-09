@@ -35,6 +35,13 @@ export const courses: Course[] = [
     path: '/week4/react-components',
     description: '認識 React 元件化開發與 Props 資料傳遞',
   },
+  {
+    id: 'react-router',
+    week: 5,
+    title: 'React Router',
+    path: '/week5/react-router',
+    description: '了解 React 路由機制與頁面切換原理',
+  },
 ];
 
 export function getCoursesByWeek(week: number): Course[] {

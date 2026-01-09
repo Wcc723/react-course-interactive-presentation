@@ -4,6 +4,7 @@ import { SeparationOfConcernsSlide } from './week1/關注點分離';
 import { AsyncSlide } from './week2/非同步';
 import { EcommerceAPISlide } from './week2/電商API';
 import { ReactComponentSlide } from './week4/React元件';
+import { ReactRouterSlide } from './week5/React-Router';
 
 export const router = createHashRouter([
   {
@@ -25,5 +26,9 @@ export const router = createHashRouter([
   {
     path: '/week4/react-components',
     element: <ReactComponentSlide />,
+  },
+  {
+    path: '/week5/react-router',
+    element: <ReactRouterSlide />,
   },
 ]);
